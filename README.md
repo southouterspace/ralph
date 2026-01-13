@@ -30,21 +30,27 @@ chmod +x scripts/ralph/ralph.sh
 
 ### Option 2: Install skills globally
 
-Copy the skills to your Claude Code config for use across all projects:
+Claude Code auto-discovers skills from `~/.claude/skills/`. Each skill is a directory containing a `SKILL.md` file with YAML frontmatter and markdown instructions.
 
 ```bash
+# Create the global skills directory
+mkdir -p ~/.claude/skills
+
+# Copy the Ralph skills
 cp -r skills/prd ~/.claude/skills/
 cp -r skills/ralph ~/.claude/skills/
 ```
+
+Once installed, Claude Code will automatically discover these skills. You can verify by running `/help` in Claude Code to see available skills.
 
 ## Workflow
 
 ### 1. Create a PRD
 
-Use the PRD skill to generate a detailed requirements document:
+Use the PRD skill to generate a detailed requirements document. Claude Code auto-discovers skills via natural language:
 
 ```
-Load the prd skill and create a PRD for [your feature description]
+Create a PRD for [your feature description]
 ```
 
 Answer the clarifying questions. The skill saves output to `tasks/prd-[feature-name].md`.
@@ -54,7 +60,7 @@ Answer the clarifying questions. The skill saves output to `tasks/prd-[feature-n
 Use the Ralph skill to convert the markdown PRD to JSON:
 
 ```
-Load the ralph skill and convert tasks/prd-[feature-name].md to prd.json
+Convert tasks/prd-[feature-name].md to ralph prd.json format
 ```
 
 This creates `prd.json` with user stories structured for autonomous execution.
@@ -128,11 +134,14 @@ Too big (split these):
 - "Add authentication"
 - "Refactor the API"
 
-### AGENTS.md Updates Are Critical
+### AGENTS.md and CLAUDE.md Updates Are Critical
 
-After each iteration, Ralph updates the relevant `AGENTS.md` files with learnings. This is key because Claude Code automatically reads these files, so future iterations (and future human developers) benefit from discovered patterns, gotchas, and conventions.
+After each iteration, Ralph updates the relevant `AGENTS.md` files with learnings. Claude Code automatically reads `CLAUDE.md` (project root) and `AGENTS.md` files throughout the codebase, so future iterations (and future human developers) benefit from discovered patterns, gotchas, and conventions.
 
-Examples of what to add to AGENTS.md:
+- **CLAUDE.md** - Project-wide instructions, build commands, and conventions (root directory)
+- **AGENTS.md** - Directory-specific context and patterns (placed in relevant subdirectories)
+
+Examples of what to add:
 - Patterns discovered ("this codebase uses X for Y")
 - Gotchas ("do not forget to update Z when changing W")
 - Useful context ("the settings panel is in component X")
@@ -182,3 +191,4 @@ Ralph automatically archives previous runs when you start a new feature (differe
 
 - [Geoffrey Huntley's Ralph article](https://ghuntley.com/ralph/)
 - [Claude Code documentation](https://docs.anthropic.com/en/docs/claude-code)
+- [Claude Code CLI reference](https://docs.anthropic.com/en/docs/claude-code/cli-usage)
