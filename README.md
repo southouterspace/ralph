@@ -2,7 +2,7 @@
 
 ![Ralph](ralph.webp)
 
-Ralph is an autonomous AI agent loop that runs [Amp](https://ampcode.com) repeatedly until all PRD items are complete. Each iteration is a fresh Amp instance with clean context. Memory persists via git history, `progress.txt`, and `prd.json`.
+Ralph is an autonomous AI agent loop that runs [Claude Code](https://docs.anthropic.com/en/docs/claude-code) repeatedly until all PRD items are complete. Each iteration is a fresh Claude Code instance with clean context. Memory persists via git history, `progress.txt`, and `prd.json`.
 
 Based on [Geoffrey Huntley's Ralph pattern](https://ghuntley.com/ralph/).
 
@@ -10,7 +10,7 @@ Based on [Geoffrey Huntley's Ralph pattern](https://ghuntley.com/ralph/).
 
 ## Prerequisites
 
-- [Amp CLI](https://ampcode.com) installed and authenticated
+- [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) installed and authenticated
 - `jq` installed (`brew install jq` on macOS)
 - A git repository for your project
 
@@ -30,33 +30,27 @@ chmod +x scripts/ralph/ralph.sh
 
 ### Option 2: Install skills globally
 
-Copy the skills to your Amp config for use across all projects:
+Claude Code auto-discovers skills from `~/.claude/skills/`. Each skill is a directory containing a `SKILL.md` file with YAML frontmatter and markdown instructions.
 
 ```bash
-cp -r skills/prd ~/.config/amp/skills/
-cp -r skills/ralph ~/.config/amp/skills/
+# Create the global skills directory
+mkdir -p ~/.claude/skills
+
+# Copy the Ralph skills
+cp -r skills/prd ~/.claude/skills/
+cp -r skills/ralph ~/.claude/skills/
 ```
 
-### Configure Amp auto-handoff (recommended)
-
-Add to `~/.config/amp/settings.json`:
-
-```json
-{
-  "amp.experimental.autoHandoff": { "context": 90 }
-}
-```
-
-This enables automatic handoff when context fills up, allowing Ralph to handle large stories that exceed a single context window.
+Once installed, Claude Code will automatically discover these skills. You can verify by running `/help` in Claude Code to see available skills.
 
 ## Workflow
 
 ### 1. Create a PRD
 
-Use the PRD skill to generate a detailed requirements document:
+Use the PRD skill to generate a detailed requirements document. Claude Code auto-discovers skills via natural language:
 
 ```
-Load the prd skill and create a PRD for [your feature description]
+Create a PRD for [your feature description]
 ```
 
 Answer the clarifying questions. The skill saves output to `tasks/prd-[feature-name].md`.
@@ -66,7 +60,7 @@ Answer the clarifying questions. The skill saves output to `tasks/prd-[feature-n
 Use the Ralph skill to convert the markdown PRD to JSON:
 
 ```
-Load the ralph skill and convert tasks/prd-[feature-name].md to prd.json
+Convert tasks/prd-[feature-name].md to ralph prd.json format
 ```
 
 This creates `prd.json` with user stories structured for autonomous execution.
@@ -93,8 +87,8 @@ Ralph will:
 
 | File | Purpose |
 |------|---------|
-| `ralph.sh` | The bash loop that spawns fresh Amp instances |
-| `prompt.md` | Instructions given to each Amp instance |
+| `ralph.sh` | The bash loop that spawns fresh Claude Code instances |
+| `prompt.md` | Instructions given to each Claude Code instance |
 | `prd.json` | User stories with `passes` status (the task list) |
 | `prd.json.example` | Example PRD format for reference |
 | `progress.txt` | Append-only learnings for future iterations |
@@ -120,7 +114,7 @@ npm run dev
 
 ### Each Iteration = Fresh Context
 
-Each iteration spawns a **new Amp instance** with clean context. The only memory between iterations is:
+Each iteration spawns a **new Claude Code instance** with clean context. The only memory between iterations is:
 - Git history (commits from previous iterations)
 - `progress.txt` (learnings and context)
 - `prd.json` (which stories are done)
@@ -140,11 +134,14 @@ Too big (split these):
 - "Add authentication"
 - "Refactor the API"
 
-### AGENTS.md Updates Are Critical
+### AGENTS.md and CLAUDE.md Updates Are Critical
 
-After each iteration, Ralph updates the relevant `AGENTS.md` files with learnings. This is key because Amp automatically reads these files, so future iterations (and future human developers) benefit from discovered patterns, gotchas, and conventions.
+After each iteration, Ralph updates the relevant `AGENTS.md` files with learnings. Claude Code automatically reads `CLAUDE.md` (project root) and `AGENTS.md` files throughout the codebase, so future iterations (and future human developers) benefit from discovered patterns, gotchas, and conventions.
 
-Examples of what to add to AGENTS.md:
+- **CLAUDE.md** - Project-wide instructions, build commands, and conventions (root directory)
+- **AGENTS.md** - Directory-specific context and patterns (placed in relevant subdirectories)
+
+Examples of what to add:
 - Patterns discovered ("this codebase uses X for Y")
 - Gotchas ("do not forget to update Z when changing W")
 - Useful context ("the settings panel is in component X")
@@ -193,4 +190,5 @@ Ralph automatically archives previous runs when you start a new feature (differe
 ## References
 
 - [Geoffrey Huntley's Ralph article](https://ghuntley.com/ralph/)
-- [Amp documentation](https://ampcode.com/manual)
+- [Claude Code documentation](https://docs.anthropic.com/en/docs/claude-code)
+- [Claude Code CLI reference](https://docs.anthropic.com/en/docs/claude-code/cli-usage)
